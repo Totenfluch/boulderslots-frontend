@@ -31,7 +31,7 @@ class App extends React.Component {
   async componentDidMount() {
     let backendRequest;
     try {
-      backendRequest = await axios.get('http://totenfluch.de:3005/api/v1/slotsData');
+      backendRequest = await axios.get('https://boulderslots.ziegler.dev:3005/api/v1/slotsData');
     } catch (e) {
       console.error(e);
       return;
