@@ -87,18 +87,22 @@ class StatsPage extends React.Component {
         case 0:
           return (<SlotsChart
             chartData={freimannData}
+            styleColor={styleColor(hallValue, hallValue)}
           />);
         case 1:
           return (<SlotsChart
             chartData={thalkirchenData}
+            styleColor={styleColor(hallValue, hallValue)}
           />);
         case 2:
           return (<SlotsChart
             chartData={gilchingData}
+            styleColor={styleColor(hallValue, hallValue)}
           />);
         case 3:
           return (<SlotsChart
             chartData={toelzData}
+            styleColor={styleColor(hallValue, hallValue)}
           />);
         default: 
           return (<></>);
@@ -108,7 +112,7 @@ class StatsPage extends React.Component {
     return (
       <Container>
         <Typography variant="h4">
-          Boulder- and Climbslots for the recent days | Times in UTC+0
+          Boulder- and Climbslots for the recent days
           </Typography>
         <Divider />
         <div style={{ marginTop: '12px' }} />

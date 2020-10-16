@@ -1,7 +1,7 @@
 import React from 'react';
 import {
-  Checkbox, FormGroup, FormControlLabel, TextField,
-  Typography, Accordion, AccordionSummary, AccordionDetails, Divider
+  Checkbox, FormGroup, FormControlLabel, TextField, Grid,
+  Typography, Fab, Divider, Grow, Popper, Paper, ClickAwayListener,
 } from '@material-ui/core';
 import { Chart } from 'react-google-charts';
 
@@ -9,7 +9,7 @@ import {
   makeStyles, useTheme,
 } from '@material-ui/core/styles';
 
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Equalizer } from '@material-ui/icons';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -23,6 +23,15 @@ const useStyles = makeStyles(theme => ({
   },
   sectionDivider: {
     marginBottom: theme.spacing(1),
+  },
+  filterContainer: {
+    padding: '12px',
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
   },
 }));
 
@@ -42,17 +51,20 @@ class SlotsChart extends React.Component {
       fridayChecked: true,
       saturdayChecked: true,
       sundayChecked: true,
+      climbslotsChecked: true,
+      boulderslotsChecked: true,
     };
 
     this.RenderSlotsChart = this.RenderSlotsChart.bind(this);
   }
 
   RenderSlotsChart() {
-    const { chartData } = this.props;
+    const { chartData, styleColor } = this.props;
     const {
       dayChecked, nightChecked, startValue, endValue,
       mondayChecked, tuesdayChecked, wednesdayChecked,
-      thursdayChecked, fridayChecked, saturdayChecked, sundayChecked
+      thursdayChecked, fridayChecked, saturdayChecked, sundayChecked,
+      climbslotsChecked, boulderslotsChecked,
     } = this.state;
     const classes = useStyles();
     const theme = useTheme();
@@ -174,129 +186,192 @@ class SlotsChart extends React.Component {
       });
     }
 
+    if (!climbslotsChecked || !boulderslotsChecked) {
+      if (!climbslotsChecked && !boulderslotsChecked) {
+
+      } else if (!climbslotsChecked) {
+        filteredChartData = filteredChartData.map((data) => data.slice(0, -1))
+      } else if (!boulderslotsChecked) {
+        filteredChartData = filteredChartData.map((data) => [data[0], data[2]]);
+      }
+    }
+
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleFilterOpen = (event) => {
+      setAnchorEl(anchorEl ? null : event.currentTarget);
+    };
+
+    const handleFilterClose = (event) => {
+      setAnchorEl(null);
+    };
+
+    const open = Boolean(anchorEl);
+    const id = open ? 'transitions-popper' : undefined;
+
     return (
       <>
-        <Accordion>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Typography className={classes.heading}>Filters</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <div>
-              <Typography variant="h5">
-                Enable Day or Night
-              </Typography>
-              <FormGroup row>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={dayChecked}
-                      onChange={(event) => this.setState({ dayChecked: event.target.checked })}
-                      name="Day"
-                      color="primary"
+        <Fab
+          variant="extended"
+          size="medium"
+          aria-label="add"
+          className={classes.margin}
+          style={{ backgroundColor: styleColor }}
+          onClick={handleFilterOpen}
+        >
+          <Equalizer className={classes.extendedIcon} />
+          Filter and Options
+        </Fab>
+
+        <Popper id={id} open={open} anchorEl={anchorEl} transition placement="bottom-start">
+          {({ TransitionProps }) => (
+            <Grow {...TransitionProps} timeout={250}>
+              <ClickAwayListener onClickAway={handleFilterClose}>
+                <Paper className={classes.filterContainer}>
+                  <Typography variant="h5">
+                    Enable Climbslots and Boulderslots
+                  </Typography>
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={climbslotsChecked}
+                          onChange={(event) => this.setState({ climbslotsChecked: event.target.checked })}
+                          name="Climbslots"
+                          color="primary"
+                        />
+                      }
+                      label="Climbslots"
                     />
-                  }
-                  label="Day"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={nightChecked}
-                      onChange={(event) => this.setState({ nightChecked: event.target.checked })}
-                      name="Night"
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={boulderslotsChecked}
+                          onChange={(event) => this.setState({ boulderslotsChecked: event.target.checked })}
+                          name="Boulderslots"
+                        />
+                      }
+                      label="Boulderslots"
                     />
-                  }
-                  label="Night"
-                />
-              </FormGroup>
-              <Divider />
-              <Typography variant="h5" className={classes.sectionDivider}>
-                Set Start- and Endtime of the Timeseries
-              </Typography>
-              <div style={{ display: 'flex' }}>
-                <form className={classes.container} noValidate>
-                  <TextField
-                    id="datetime_start"
-                    label="Start Timespan"
-                    type="datetime-local"
-                    format="dd/MM/YYYY HH:mm"
-                    value={startValue}
-                    onChange={(event) => this.setState({ startValue: event.target.value })}
-                    className={classes.textField}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                </form>
-                <form className={classes.container} noValidate>
-                  <TextField
-                    id="datetime_end"
-                    label="End Timespan"
-                    type="datetime-local"
-                    format="dd/MM/YYYY HH:mm"
-                    value={endValue}
-                    onChange={(event) => this.setState({ endValue: event.target.value })}
-                    className={classes.textField}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                </form>
-              </div>
-              <Divider style={{ marginBottom: '8px', marginTop: '8px'}} />
-              <Typography variant="h5">
-                Disable or Enable Weekdays
-              </Typography>
-              <FormGroup row>
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={mondayChecked} onChange={(event) => this.setState({ mondayChecked: event.target.checked })} name="mondayChecked" color="primary" />
-                  }
-                  label="Monday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={tuesdayChecked} onChange={(event) => this.setState({ tuesdayChecked: event.target.checked })} name="tuesdayChecked" color="primary" />
-                  }
-                  label="Tuesday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={wednesdayChecked} onChange={(event) => this.setState({ wednesdayChecked: event.target.checked })} name="wednesdayChecked" color="primary" />
-                  }
-                  label="Wednesday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={thursdayChecked} onChange={(event) => this.setState({ thursdayChecked: event.target.checked })} name="thursdayChecked" color="primary" />
-                  }
-                  label="Thursday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={fridayChecked} onChange={(event) => this.setState({ fridayChecked: event.target.checked })} name="fridayChecked" color="primary" />
-                  }
-                  label="Friday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={saturdayChecked} onChange={(event) => this.setState({ saturdayChecked: event.target.checked })} name="saturdayChecked" color="primary" />
-                  }
-                  label="Saturday"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox checked={sundayChecked} onChange={(event) => this.setState({ sundayChecked: event.target.checked })} name="sundayChecked" color="primary" />
-                  }
-                  label="Sunday"
-                />
-              </FormGroup>
-            </div>
-          </AccordionDetails>
-        </Accordion>
+                  </FormGroup>
+                  <Divider />
+                  <Typography variant="h5">
+                    Enable Day or Night
+                  </Typography>
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={dayChecked}
+                          onChange={(event) => this.setState({ dayChecked: event.target.checked })}
+                          name="Day"
+                          color="primary"
+                        />
+                      }
+                      label="Day"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={nightChecked}
+                          onChange={(event) => this.setState({ nightChecked: event.target.checked })}
+                          name="Night"
+                        />
+                      }
+                      label="Night"
+                    />
+                  </FormGroup>
+                  <Divider />
+                  <Typography variant="h5" className={classes.sectionDivider}>
+                    Set Start- and Endtime of the Timeseries
+                  </Typography>
+                  <Grid container>
+                    <Grid item>
+                      <form className={classes.container} noValidate>
+                        <TextField
+                          id="datetime_start"
+                          label="Start Timespan"
+                          type="datetime-local"
+                          format="dd/MM/YYYY HH:mm"
+                          value={startValue}
+                          onChange={(event) => this.setState({ startValue: event.target.value })}
+                          className={classes.textField}
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                        />
+                      </form>
+                    </Grid>
+                    <Grid item>
+                      <form className={classes.container} noValidate>
+                        <TextField
+                          id="datetime_end"
+                          label="End Timespan"
+                          type="datetime-local"
+                          format="dd/MM/YYYY HH:mm"
+                          value={endValue}
+                          onChange={(event) => this.setState({ endValue: event.target.value })}
+                          className={classes.textField}
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                        />
+                      </form>
+                    </Grid>
+                  </Grid>
+                  <Divider style={{ marginBottom: '8px', marginTop: '8px' }} />
+                  <Typography variant="h5">
+                    Disable or Enable Weekdays
+                  </Typography>
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={mondayChecked} onChange={(event) => this.setState({ mondayChecked: event.target.checked })} name="mondayChecked" color="primary" />
+                      }
+                      label="Monday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={tuesdayChecked} onChange={(event) => this.setState({ tuesdayChecked: event.target.checked })} name="tuesdayChecked" color="primary" />
+                      }
+                      label="Tuesday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={wednesdayChecked} onChange={(event) => this.setState({ wednesdayChecked: event.target.checked })} name="wednesdayChecked" color="primary" />
+                      }
+                      label="Wednesday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={thursdayChecked} onChange={(event) => this.setState({ thursdayChecked: event.target.checked })} name="thursdayChecked" color="primary" />
+                      }
+                      label="Thursday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={fridayChecked} onChange={(event) => this.setState({ fridayChecked: event.target.checked })} name="fridayChecked" color="primary" />
+                      }
+                      label="Friday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={saturdayChecked} onChange={(event) => this.setState({ saturdayChecked: event.target.checked })} name="saturdayChecked" color="primary" />
+                      }
+                      label="Saturday"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox checked={sundayChecked} onChange={(event) => this.setState({ sundayChecked: event.target.checked })} name="sundayChecked" color="primary" />
+                      }
+                      label="Sunday"
+                    />
+                  </FormGroup>
+                </Paper>
+              </ClickAwayListener>
+            </Grow>
+          )}
+        </Popper>
 
         <Chart
           chartType="LineChart"
