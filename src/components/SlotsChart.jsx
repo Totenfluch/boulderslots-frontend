@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment';
 import {
   Checkbox, FormGroup, FormControlLabel, TextField, Grid,
   Typography, Fab, Divider, Grow, Popper, Paper, ClickAwayListener,
@@ -55,6 +56,7 @@ class SlotsChart extends React.Component {
       climbslotsChecked: true,
       boulderslotsChecked: true,
       daySelect: '0',
+      timespanSelect: '0',
     };
 
     this.RenderSlotsChart = this.RenderSlotsChart.bind(this);
@@ -66,7 +68,7 @@ class SlotsChart extends React.Component {
       dayChecked, nightChecked, startValue, endValue,
       mondayChecked, tuesdayChecked, wednesdayChecked,
       thursdayChecked, fridayChecked, saturdayChecked, sundayChecked,
-      climbslotsChecked, boulderslotsChecked, daySelect,
+      climbslotsChecked, boulderslotsChecked, daySelect, timespanSelect,
     } = this.state;
     const classes = useStyles();
 
@@ -286,6 +288,26 @@ class SlotsChart extends React.Component {
                   <Typography variant="h5" className={classes.sectionDivider}>
                     Set Start- and Endtime of the Timeseries
                   </Typography>
+                  <FormControl component="fieldset">
+                    <RadioGroup aria-label="timespan-select" row name="timespan-select" value={timespanSelect} 
+                      onChange={(event) => {
+                        this.setState({ timespanSelect: event.target.value });
+                        if (event.target.value === '1') {
+                          this.setState({
+                            startValue: moment(Date.now()).startOf('day').toISOString().slice(0, 16),
+                          });
+                        } else if (event.target.value === '2') {
+                          this.setState({
+                            startValue: moment(Date.now()).subtract(7, 'days').toISOString().slice(0, 16),
+                          });
+                        }
+                      }
+                    }>
+                      <FormControlLabel value="0" control={<Radio />} label="Custom" />
+                      <FormControlLabel value="1" control={<Radio />} label="Today" />
+                      <FormControlLabel value="2" control={<Radio />} label="7 Days" />
+                    </RadioGroup>
+                  </FormControl>
                   <Grid container>
                     <Grid item>
                       <form className={classes.container} noValidate>
@@ -295,7 +317,7 @@ class SlotsChart extends React.Component {
                           type="datetime-local"
                           format="dd/MM/YYYY HH:mm"
                           value={startValue}
-                          onChange={(event) => this.setState({ startValue: event.target.value })}
+                          onChange={(event) => this.setState({ startValue: event.target.value, timespanSelect: '0' })}
                           className={classes.textField}
                           InputLabelProps={{
                             shrink: true,
@@ -311,7 +333,7 @@ class SlotsChart extends React.Component {
                           type="datetime-local"
                           format="dd/MM/YYYY HH:mm"
                           value={endValue}
-                          onChange={(event) => this.setState({ endValue: event.target.value })}
+                          onChange={(event) => this.setState({ endValue: event.target.value, timespanSelect: '0' })}
                           className={classes.textField}
                           InputLabelProps={{
                             shrink: true,
