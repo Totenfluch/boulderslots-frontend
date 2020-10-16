@@ -1,6 +1,22 @@
 import React from 'react';
-import { Container, Divider, Typography, Tabs, Tab, Hidden } from '@material-ui/core';
+import { Divider, Typography, Tabs, Tab, Hidden } from '@material-ui/core';
 import SlotsChart from './SlotsChart';
+
+// container
+
+import {
+  makeStyles,
+} from '@material-ui/core/styles';
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    margin: '0 auto',
+    [theme.breakpoints.up('md')]: {
+      marginLeft: '260px',
+    },
+    padding: '8px',
+  },
+}));
 
 class StatsPage extends React.Component {
   constructor(props) {
@@ -13,6 +29,7 @@ class StatsPage extends React.Component {
   }
 
   RenderStatsPage() {
+    const classes = useStyles();
     const { statisticsData } = this.props;
     const freimannData = [['Date', 'Boulderslots', 'Climbslots']];
     const thalkirchenData = [['Date', 'Boulderslots', 'Climbslots']];
@@ -110,7 +127,7 @@ class StatsPage extends React.Component {
     }
 
     return (
-      <Container>
+      <div className={classes.container}>
         <Typography variant="h4">
           Boulder- and Climbslots for the recent days
           </Typography>
@@ -118,7 +135,7 @@ class StatsPage extends React.Component {
         <div style={{ marginTop: '12px' }} />
         {categoryMenu}
         {chartSelect()}
-      </Container>
+      </div>
     )
   }
 

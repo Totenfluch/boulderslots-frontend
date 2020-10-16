@@ -2,11 +2,12 @@ import React from 'react';
 import {
   Checkbox, FormGroup, FormControlLabel, TextField, Grid,
   Typography, Fab, Divider, Grow, Popper, Paper, ClickAwayListener,
+  FormControl, RadioGroup, Radio,
 } from '@material-ui/core';
 import { Chart } from 'react-google-charts';
 
 import {
-  makeStyles, useTheme,
+  makeStyles,
 } from '@material-ui/core/styles';
 
 import { Equalizer } from '@material-ui/icons';
@@ -41,7 +42,7 @@ class SlotsChart extends React.Component {
     super(props);
     this.state = {
       dayChecked: true,
-      nightChecked: true,
+      nightChecked: false,
       startValue: new Date('2020-10-08T12:00').toISOString().slice(0, 16),
       endValue: new Date(Date.now()).toISOString().slice(0, 16),
       mondayChecked: true,
@@ -53,6 +54,7 @@ class SlotsChart extends React.Component {
       sundayChecked: true,
       climbslotsChecked: true,
       boulderslotsChecked: true,
+      daySelect: '0',
     };
 
     this.RenderSlotsChart = this.RenderSlotsChart.bind(this);
@@ -64,10 +66,9 @@ class SlotsChart extends React.Component {
       dayChecked, nightChecked, startValue, endValue,
       mondayChecked, tuesdayChecked, wednesdayChecked,
       thursdayChecked, fridayChecked, saturdayChecked, sundayChecked,
-      climbslotsChecked, boulderslotsChecked,
+      climbslotsChecked, boulderslotsChecked, daySelect,
     } = this.state;
     const classes = useStyles();
-    const theme = useTheme();
 
     /*
     [
@@ -323,6 +324,48 @@ class SlotsChart extends React.Component {
                   <Typography variant="h5">
                     Disable or Enable Weekdays
                   </Typography>
+                  <FormControl component="fieldset">
+                    <RadioGroup aria-label="day-select" row name="day-select" value={daySelect} 
+                      onChange={(event) => {
+                        this.setState({ daySelect: event.target.value });
+                        if (event.target.value === '0') {
+                          this.setState({
+                            mondayChecked: true,
+                            tuesdayChecked: true,
+                            wednesdayChecked: true,
+                            thursdayChecked: true,
+                            fridayChecked: true,
+                            saturdayChecked: true,
+                            sundayChecked: true,
+                          });
+                        } else if (event.target.value === '1') {
+                          this.setState({
+                            mondayChecked: true,
+                            tuesdayChecked: true,
+                            wednesdayChecked: true,
+                            thursdayChecked: true,
+                            fridayChecked: true,
+                            saturdayChecked: false,
+                            sundayChecked: false,
+                          });
+                        } else if (event.target.value === '2') {
+                          this.setState({
+                            mondayChecked: false,
+                            tuesdayChecked: false,
+                            wednesdayChecked: false,
+                            thursdayChecked: false,
+                            fridayChecked: false,
+                            saturdayChecked: true,
+                            sundayChecked: true,
+                          });
+                        }
+                      }
+                    }>
+                      <FormControlLabel value="0" control={<Radio />} label="All" />
+                      <FormControlLabel value="1" control={<Radio />} label="Weekday" />
+                      <FormControlLabel value="2" control={<Radio />} label="Weekend" />
+                    </RadioGroup>
+                  </FormControl>
                   <FormGroup row>
                     <FormControlLabel
                       control={
@@ -387,8 +430,6 @@ class SlotsChart extends React.Component {
               viewWindow: {
                 min: 0,
               },
-            },
-            hAxis: {
               title: 'Available Slots',
             },
             lineWidth: 4,
