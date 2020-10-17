@@ -294,7 +294,7 @@ class SlotsChart extends React.Component {
                         this.setState({ timespanSelect: event.target.value });
                         if (event.target.value === '1') {
                           this.setState({
-                            startValue: moment(Date.now()).startOf('day').toISOString().slice(0, 16),
+                            startValue: moment(Date.now()).startOf('day').add(2, 'hours').toISOString().slice(0, 16),
                           });
                         } else if (event.target.value === '2') {
                           this.setState({
