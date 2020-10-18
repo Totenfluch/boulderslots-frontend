@@ -45,7 +45,7 @@ class SlotsChart extends React.Component {
       dayChecked: true,
       nightChecked: false,
       startValue: new Date('2020-10-08T12:00').toISOString().slice(0, 16),
-      endValue: new Date(Date.now()).toISOString().slice(0, 16),
+      endValue: new Date(Date.now() + 7800000).toISOString().slice(0, 16),
       mondayChecked: true,
       tuesdayChecked: true,
       wednesdayChecked: true,
