@@ -50,7 +50,7 @@ class App extends React.Component {
         climbFreimann: backendData[backendData.length - 1].climbFreimann,
       },
     });
-    console.log(backendData);
+    // console.log(backendData);
   }
 
   RenderApp() {

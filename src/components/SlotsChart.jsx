@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {
   Checkbox, FormGroup, FormControlLabel, TextField, Grid,
   Typography, Fab, Divider, Grow, Popper, Paper, ClickAwayListener,
@@ -12,6 +12,8 @@ import {
 } from '@material-ui/core/styles';
 
 import { Equalizer } from '@material-ui/icons';
+
+import prediction from './prediction';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -72,6 +74,59 @@ class SlotsChart extends React.Component {
     } = this.state;
     const classes = useStyles();
 
+    /*if (chartData.length === 1 || !chartData) {
+      return (<></>);
+    }*/
+
+    const usedData = JSON.parse(JSON.stringify(chartData));
+    for (let i = 0; i < usedData.length; i += 1) {
+      if (i === 0) {
+        continue;
+      }
+      usedData[i][0] = new Date(usedData[i][0]); 
+    }
+    const WINDOW_SIZE = 2;
+    const movingAverageBoulder = prediction.predict(chartData, WINDOW_SIZE, 1);
+    console.log(movingAverageBoulder.length, chartData.length, chartData.length - movingAverageBoulder.length);
+    if (movingAverageBoulder.length > 0) {
+      for (let i = 0; i < movingAverageBoulder.length; i += 1) {
+        if (i === 0) {
+          usedData[i].push('Boulderslots Prediction');
+          continue;
+        }
+        if (i < WINDOW_SIZE) {
+          usedData[i].push(null);
+          continue;
+        }
+        if (i + WINDOW_SIZE < usedData.length) {
+          usedData[i + WINDOW_SIZE].push(null);
+        } else {
+          usedData.push([moment.tz(usedData[i + WINDOW_SIZE - 1][0], 'Europe/Berlin').local().add(5, 'minutes').toDate(), null, null, movingAverageBoulder[i].avg]);
+        }
+      }
+    }
+
+    const movingAverageClimb = prediction.predict(chartData, WINDOW_SIZE, 2);
+    console.log(movingAverageClimb.length, chartData.length, chartData.length - movingAverageClimb.length);
+    if (movingAverageClimb.length > 0) {
+      for (let i = 0; i < movingAverageClimb.length; i += 1) {
+        if (i === 0) {
+          usedData[i].push('Climbslots Prediction');
+          continue;
+        }
+        if (i < WINDOW_SIZE) {
+          usedData[i].push(null);
+          continue;
+        }
+        if (i + WINDOW_SIZE < usedData.length) {
+          usedData[i + WINDOW_SIZE].push(null);
+        }
+      }
+      // Assumes boulder predictor ran
+      usedData[usedData.length - 1][4] = movingAverageClimb[movingAverageClimb.length - 1].avg;
+    }
+    console.log(usedData);
+
     /*
     [
       {
@@ -90,7 +145,7 @@ class SlotsChart extends React.Component {
       ...
     ]
     */
-    let filteredChartData = chartData;
+    let filteredChartData = usedData;
     if (!dayChecked) {
       filteredChartData = filteredChartData.filter((data, index) => {
         if (index === 0) {
@@ -193,9 +248,15 @@ class SlotsChart extends React.Component {
       if (!climbslotsChecked && !boulderslotsChecked) {
 
       } else if (!climbslotsChecked) {
-        filteredChartData = filteredChartData.map((data) => data.slice(0, -1))
+        let index = filteredChartData[0].indexOf('Climbslots');
+        filteredChartData = filteredChartData.map((data) => data.filter((item, itemIndex) => index != itemIndex));
+        index = filteredChartData[0].indexOf('Climbslots Prediction');
+        filteredChartData = filteredChartData.map((data) => data.filter((item, itemIndex) => index != itemIndex));
       } else if (!boulderslotsChecked) {
-        filteredChartData = filteredChartData.map((data) => [data[0], data[2]]);
+        let index = filteredChartData[0].indexOf('Boulderslots');
+        filteredChartData = filteredChartData.map((data) => data.filter((item, itemIndex) => index != itemIndex));
+        index = filteredChartData[0].indexOf('Boulderslots Prediction');
+        filteredChartData = filteredChartData.map((data) => data.filter((item, itemIndex) => index != itemIndex));
       }
     }
 
@@ -289,7 +350,7 @@ class SlotsChart extends React.Component {
                     Set Start- and Endtime of the Timeseries
                   </Typography>
                   <FormControl component="fieldset">
-                    <RadioGroup aria-label="timespan-select" row name="timespan-select" value={timespanSelect} 
+                    <RadioGroup aria-label="timespan-select" row name="timespan-select" value={timespanSelect}
                       onChange={(event) => {
                         this.setState({ timespanSelect: event.target.value });
                         if (event.target.value === '1') {
@@ -302,7 +363,7 @@ class SlotsChart extends React.Component {
                           });
                         }
                       }
-                    }>
+                      }>
                       <FormControlLabel value="0" control={<Radio />} label="Custom" />
                       <FormControlLabel value="1" control={<Radio />} label="Today" />
                       <FormControlLabel value="2" control={<Radio />} label="7 Days" />
@@ -347,7 +408,7 @@ class SlotsChart extends React.Component {
                     Disable or Enable Weekdays
                   </Typography>
                   <FormControl component="fieldset">
-                    <RadioGroup aria-label="day-select" row name="day-select" value={daySelect} 
+                    <RadioGroup aria-label="day-select" row name="day-select" value={daySelect}
                       onChange={(event) => {
                         this.setState({ daySelect: event.target.value });
                         if (event.target.value === '0') {
@@ -382,7 +443,7 @@ class SlotsChart extends React.Component {
                           });
                         }
                       }
-                    }>
+                      }>
                       <FormControlLabel value="0" control={<Radio />} label="All" />
                       <FormControlLabel value="1" control={<Radio />} label="Weekday" />
                       <FormControlLabel value="2" control={<Radio />} label="Weekend" />

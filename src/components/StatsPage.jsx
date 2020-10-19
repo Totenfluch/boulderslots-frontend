@@ -45,7 +45,6 @@ class StatsPage extends React.Component {
     const { hallValue } = this.state;
 
     const styleColor = (value, hall) => {
-      console.log(value);
       if (value !== hall) {
         return '#000000';
       }
