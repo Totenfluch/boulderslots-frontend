@@ -46,7 +46,7 @@ class SlotsChart extends React.Component {
     this.state = {
       dayChecked: true,
       nightChecked: false,
-      startValue: new Date('2020-10-08T12:00').toISOString().slice(0, 16),
+      startValue: moment(Date.now()).startOf('day').add(2, 'hours').toISOString().slice(0, 16),
       endValue: new Date(Date.now() + 7800000).toISOString().slice(0, 16),
       mondayChecked: true,
       tuesdayChecked: true,
@@ -58,10 +58,27 @@ class SlotsChart extends React.Component {
       climbslotsChecked: true,
       boulderslotsChecked: true,
       daySelect: '0',
-      timespanSelect: '0',
+      timespanSelect: '1',
     };
 
     this.RenderSlotsChart = this.RenderSlotsChart.bind(this);
+    this.setTimespan = this.setTimespan.bind(this);
+  }
+
+  setTimespan(value) {
+    if (value === '1') {
+      this.setState({
+        startValue: moment(Date.now()).startOf('day').add(2, 'hours').toISOString().slice(0, 16),
+      });
+    } else if (value === '2') {
+      this.setState({
+        startValue: moment(Date.now()).subtract(7, 'days').toISOString().slice(0, 16),
+      });
+    }
+  }
+
+  componentWillMount() {
+    this.setTimespan('1');
   }
 
   RenderSlotsChart() {
@@ -353,15 +370,7 @@ class SlotsChart extends React.Component {
                     <RadioGroup aria-label="timespan-select" row name="timespan-select" value={timespanSelect}
                       onChange={(event) => {
                         this.setState({ timespanSelect: event.target.value });
-                        if (event.target.value === '1') {
-                          this.setState({
-                            startValue: moment(Date.now()).startOf('day').add(2, 'hours').toISOString().slice(0, 16),
-                          });
-                        } else if (event.target.value === '2') {
-                          this.setState({
-                            startValue: moment(Date.now()).subtract(7, 'days').toISOString().slice(0, 16),
-                          });
-                        }
+                        this.setTimespan(event.target.value);
                       }
                       }>
                       <FormControlLabel value="0" control={<Radio />} label="Custom" />
