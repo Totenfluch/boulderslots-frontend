@@ -102,7 +102,7 @@ class SlotsChart extends React.Component {
       }
       usedData[i][0] = new Date(usedData[i][0]); 
     }
-    const WINDOW_SIZE = 2;
+    /* const WINDOW_SIZE = 2;
     const movingAverageBoulder = prediction.predict(chartData, WINDOW_SIZE, 1);
     console.log(movingAverageBoulder.length, chartData.length, chartData.length - movingAverageBoulder.length);
     if (movingAverageBoulder.length > 0) {
@@ -142,7 +142,7 @@ class SlotsChart extends React.Component {
       // Assumes boulder predictor ran
       usedData[usedData.length - 1][4] = movingAverageClimb[movingAverageClimb.length - 1].avg;
     }
-    console.log(usedData);
+    console.log(usedData);*/
 
     /*
     [
